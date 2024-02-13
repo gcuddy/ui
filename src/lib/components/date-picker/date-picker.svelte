@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Calendar } from '$lib/components/ui/calendar/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
-	import * as Popover from '$lib/components/ui/popover/index.js';
 
 	import { cn } from '$lib/utils.js';
 	import {
@@ -477,134 +476,113 @@
 	}}
 />
 
-<Popover.Root
-	bind:open
-	openFocus={handleInitialFocus}
-	onOpenChange={(open) => {
-		if (!open) {
-			searchValue = '';
-		}
-	}}
->
-	<Popover.Trigger>
-		<!-- hm.... don't love this -->
-		<!-- {value ? df.format(value.toDate(getLocalTimeZone())) : 'Select a date   '} -->
-		<slot {value}>
-			<CalendarPlus class={cn('h-5 w-5 text-muted-foreground', className)} />
-		</slot>
-	</Popover.Trigger>
-	<!-- {value ? df.format(value.toDate(getLocalTimeZone())) : "Select a date"} -->
-
-	<Popover.Content data-date-picker class="z-50 flex w-64 flex-col gap-2 rounded-lg p-2">
-		{#if commandShowing}
-			<Command.Root shouldFilter={false}>
-				<Command.Input
-					placeholder="When"
-					class={cn(
-						'flex h-7 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50'
-					)}
-					wrapperClass="border-0"
-					autofocus
-					bind:value={searchValue}
-				/>
-				<Command.List>
-					<Command.Group class="p-0 pt-1.5">
-						{#each handleSearch(searchValue) as result}
-							<Command.Item
-								value={result.date.toString()}
-								onSelect={() => {
-									value = result.date;
-									open = false;
-									onChange(result.date.toDate(getLocalTimeZone()));
-									tick().then(() => {
-										searchValue = '';
-									});
-								}}
-								class="py-1 font-medium"
-							>
-								<svelte:component
-									this={result.icon}
-									{...result.iconProps ?? {}}
-									class="mr-1.5 h-4 w-4 {result.iconClass ?? ''}"
-								/>
-								<span class="text-white">{result.text}</span>
-								<span class="ml-auto text-sm text-white/75">
-									{result.relativeDate}
-								</span>
-							</Command.Item>
-						{/each}
-					</Command.Group>
-				</Command.List>
-			</Command.Root>
-		{:else}
-			<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-			<div
-				class="flex items-center justify-center focus-visible:outline-none"
-				tabindex={0}
-				on:blur={(e) => {
-					e.currentTarget.tabIndex = -1;
-				}}
-				bind:this={dummyInput}
-			>
-				<div class="relative w-fit">
-					<div class="animate-blink absolute left-0 h-full w-[2px] rounded bg-gray-400"></div>
-					<span class="text-xs font-medium text-muted-foreground">When</span>
-				</div>
-			</div>
-			<div class="flex flex-col">
-				<button
-					data-button-today
-					bind:this={todayButton}
-					on:click={() => {
-						value = today(getLocalTimeZone());
-						open = false;
-						onChange(value?.toDate(getLocalTimeZone()));
-					}}
-					class="inline-flex items-center rounded p-1 text-sm font-medium hover:bg-accent/75 focus:bg-accent/75 focus-visible:outline-none"
-				>
-					<Star weight="fill" class="mr-1.5 h-4 w-4 text-yellow-400" />
-					Today</button
-				>
-				<button
-					on:click={() => {
-						value = today(getLocalTimeZone()).add({ days: 1 });
-						open = false;
-						onChange(value?.toDate(getLocalTimeZone()));
-					}}
-					data-button-tomorrow
-					bind:this={tomorrowButton}
-					class="group inline-flex items-center rounded p-1 text-sm font-medium hover:bg-accent/75 focus:bg-accent/75 focus-visible:outline-none"
-				>
-					<CalendarIcon weight="fill" class="mr-1.5 h-4 w-4 text-red-400 group-focus:text-white" />
-					Tomorrow</button
-				>
-			</div>
-			<div bind:this={calendarWrapper} class="rounded-md">
-				<Calendar
-					class="p-1 pt-0"
-					on:keydown={(event) => {
-						handleCalendarEvent(event);
-					}}
-					onValueChange={(value) => {
-						console.log(`onValueChange`, { value });
-						onChange(value?.toDate(getLocalTimeZone()));
-						if (value) {
+{#if commandShowing}
+	<Command.Root shouldFilter={false}>
+		<Command.Input
+			placeholder="When"
+			class={cn(
+				'flex h-7 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50'
+			)}
+			wrapperClass="border-0"
+			autofocus
+			bind:value={searchValue}
+		/>
+		<Command.List>
+			<Command.Group class="p-0 pt-1.5">
+				{#each handleSearch(searchValue) as result}
+					<Command.Item
+						value={result.date.toString()}
+						onSelect={() => {
+							value = result.date;
 							open = false;
-						}
-					}}
-					minValue={today(getLocalTimeZone())}
-					bind:value
-				/>
-			</div>
-			<Button
-				class="dark:bg-gray-800"
-				variant="secondary"
-				on:click={() => {
-					value = undefined;
+							onChange(result.date.toDate(getLocalTimeZone()));
+							tick().then(() => {
+								searchValue = '';
+							});
+						}}
+						class="py-1 font-medium"
+					>
+						<svelte:component
+							this={result.icon}
+							{...result.iconProps ?? {}}
+							class="mr-1.5 h-4 w-4 {result.iconClass ?? ''}"
+						/>
+						<span class="text-white">{result.text}</span>
+						<span class="ml-auto text-sm text-white/75">
+							{result.relativeDate}
+						</span>
+					</Command.Item>
+				{/each}
+			</Command.Group>
+		</Command.List>
+	</Command.Root>
+{:else}
+	<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+	<div
+		class="flex items-center justify-center focus-visible:outline-none"
+		tabindex={0}
+		on:blur={(e) => {
+			e.currentTarget.tabIndex = -1;
+		}}
+		bind:this={dummyInput}
+	>
+		<div class="relative w-fit">
+			<div class="animate-blink absolute left-0 h-full w-[2px] rounded bg-gray-400"></div>
+			<span class="text-xs font-medium text-muted-foreground">When</span>
+		</div>
+	</div>
+	<div class="flex flex-col">
+		<button
+			data-button-today
+			bind:this={todayButton}
+			on:click={() => {
+				value = today(getLocalTimeZone());
+				open = false;
+				onChange(value?.toDate(getLocalTimeZone()));
+			}}
+			class="inline-flex items-center rounded p-1 text-sm font-medium hover:bg-accent/75 focus:bg-accent/75 focus-visible:outline-none"
+		>
+			<Star weight="fill" class="mr-1.5 h-4 w-4 text-yellow-400" />
+			Today</button
+		>
+		<button
+			on:click={() => {
+				value = today(getLocalTimeZone()).add({ days: 1 });
+				open = false;
+				onChange(value?.toDate(getLocalTimeZone()));
+			}}
+			data-button-tomorrow
+			bind:this={tomorrowButton}
+			class="group inline-flex items-center rounded p-1 text-sm font-medium hover:bg-accent/75 focus:bg-accent/75 focus-visible:outline-none"
+		>
+			<CalendarIcon weight="fill" class="mr-1.5 h-4 w-4 text-red-400 group-focus:text-white" />
+			Tomorrow</button
+		>
+	</div>
+	<div bind:this={calendarWrapper} class="rounded-md">
+		<Calendar
+			class="p-1 pt-0"
+			on:keydown={(event) => {
+				handleCalendarEvent(event);
+			}}
+			onValueChange={(value) => {
+				console.log(`onValueChange`, { value });
+				onChange(value?.toDate(getLocalTimeZone()));
+				if (value) {
 					open = false;
-					onChange(null);
-				}}>Clear</Button
-			>
-		{/if}
-	</Popover.Content>
-</Popover.Root>
+				}
+			}}
+			minValue={today(getLocalTimeZone())}
+			bind:value
+		/>
+	</div>
+	<Button
+		class="dark:bg-gray-800"
+		variant="secondary"
+		on:click={() => {
+			value = undefined;
+			open = false;
+			onChange(null);
+		}}>Clear</Button
+	>
+{/if}
